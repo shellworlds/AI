@@ -1,0 +1,13 @@
+{
+  "timestamp": "$(date -Iseconds)",
+  "qubits_used": 23,
+  "simulation_type": "shipping_risk",
+  "animation_files": [
+    "shipping_risk_simulation.gif",
+    "logistics_optimization.gif"
+  ],
+  "circuit_diagrams": {
+    "shipping": "23-qubit circuit diagram (ASCII)",
+    "logistics": "23-qubit optimization circuit"
+  }
+}

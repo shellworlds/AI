@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Risk Analysis Platform - 23-Qubit Simulations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #60a5fa, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #334155;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #60a5fa;
+        }
+        
+        .card h2 {
+            color: #60a5fa;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 10px;
+        }
+        
+        .simulation-display {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #334155;
+            overflow-x: auto;
+        }
+        
+        .gif-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .gif-container img {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 2px solid #60a5fa;
+            box-shadow: 0 4px 20px rgba(96, 165, 250, 0.3);
+        }
+        
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        button {
+            background: linear-gradient(90deg, #3b82f6, #6366f1);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        button:hover {
+            background: linear-gradient(90deg, #2563eb, #4f46e5);
+            transform: scale(1.05);
+        }
+        
+        button:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-active {
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+        }
+        
+        .ascii-circuit {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.2;
+            white-space: pre;
+            overflow-x: auto;
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 6px;
+            color: #86efac;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .metric {
+            text-align: center;
+            padding: 15px;
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 8px;
+            border: 1px solid #334155;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #60a5fa;
+            margin: 10px 0;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #334155;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .api-url {
+            background: #1e293b;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            color: #86efac;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚛ Quantum Risk Analysis Platform</h1>
+            <p class="subtitle">23-Qubit Simulations for Geopolitical & Logistics Risk Assessment</p>
+            <div class="metrics-grid">
+                <div class="metric">
+                    <div class="metric-value" id="qubitCount">23</div>
+                    <div class="metric-label">Qubits Active</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="simulationCount">2</div>
+                    <div class="metric-label">Simulations</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="apiStatus">●</div>
+                    <div class="metric-label">API Status</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">4s</div>
+                    <div class="metric-label">Animation Duration</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="dashboard">
+            <!-- Simulation 1: Shipping Risk -->
+            <div class="card">
+                <h2>🛳️ Quantum Shipping Risk Analysis</h2>
+                <div class="gif-container">
+                    <img id="shippingGif" src="simulations/shipping_risk_simulation.gif" 
+                         alt="Shipping Risk Quantum Simulation" 
+                         onerror="this.src='https://via.placeholder.com/600x300/1e293b/60a5fa?text=Shipping+Risk+Simulation+GIF'">
+                </div>
+                <div class="control-panel">
+                    <button onclick="runSimulation('shipping_risk')">Run Simulation</button>
+                    <button onclick="getCircuit('shipping')">Show ASCII Circuit</button>
+                    <button onclick="downloadResults('shipping')">Download Results</button>
+                </div>
+                <div class="simulation-display">
+                    <h3>ASCII Quantum Circuit:</h3>
+                    <div id="shippingCircuit" class="ascii-circuit">
+                        Click "Show ASCII Circuit" to display 23-qubit circuit diagram
+                    </div>
+                </div>
+                <div class="simulation-display">
+                    <h3>Simulation Parameters:</h3>
+                    <pre id="shippingParams">
+Qubits: 23 | Shots: 1024 | Duration: 4s
+Risk Factors: Weather, Geopolitical, Port Congestion
+Quantum Gates: H, RX, RY, CX, CRX, Toffoli
+                    </pre>
+                </div>
+            </div>
+            
+            <!-- Simulation 2: Logistics Optimization -->
+            <div class="card">
+                <h2>📦 Quantum Logistics Optimization</h2>
+                <div class="gif-container">
+                    <img id="logisticsGif" src="simulations/logistics_optimization.gif" 
+                         alt="Logistics Optimization Quantum Simulation"
+                         onerror="this.src='https://via.placeholder.com/600x300/1e293b/818cf8?text=Logistics+Optimization+Simulation+GIF'">
+                </div>
+                <div class="control-panel">
+                    <button onclick="runSimulation('logistics_optimization')">Run Simulation</button>
+                    <button onclick="getCircuit('logistics')">Show ASCII Circuit</button>
+                    <button onclick="downloadResults('logistics')">Download Results</button>
+                </div>
+                <div class="simulation-display">
+                    <h3>ASCII Quantum Circuit:</h3>
+                    <div id="logisticsCircuit" class="ascii-circuit">
+                        Click "Show ASCII Circuit" to display 23-qubit circuit diagram
+                    </div>
+                </div>
+                <div class="simulation-display">
+                    <h3>Simulation Parameters:</h3>
+                    <pre id="logisticsParams">
+Qubits: 23 | Shots: 1024 | Duration: 4s
+Algorithm: QAOA-inspired Optimization
+Gates: H, RXX, RYY, Toffoli, RZ
+Application: Route Optimization, TSP
+                    </pre>
+                </div>
+            </div>
+        </div>
+        
+        <!-- API Information -->
+        <div class="card">
+            <h2>🔗 Backend API Endpoints</h2>
+            <div class="api-url">Base URL: <span id="apiBaseUrl">http://localhost:8000</span></div>
+            
+            <div class="control-panel">
+                <button onclick="checkApiStatus()">Check API Status</button>
+                <button onclick="getAllResults()">Get All Results</button>
+                <button onclick="openApiDocs()">Open API Documentation</button>
+            </div>
+            
+            <div class="simulation-display">
+                <h3>Available Endpoints:</h3>
+                <pre>
+GET  /                     → API Information
+POST /api/quantum/simulate → Run new simulation
+GET  /api/quantum/results/{id} → Get simulation results
+GET  /api/quantum/circuit/{id} → Get ASCII circuit
+GET  /api/quantum/gif/{id}/{index} → Get simulation GIF
+GET  /api/quantum/status   → API status
+                </pre>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Quantum Risk Analysis Platform v1.0 | 23-Qubit Simulations</p>
+            <p>Repository: <a href="https://github.com/shellworlds/ENVR/tree/ENVR2134" 
+                            style="color: #60a5fa;">ENVR2134 Branch</a></p>
+            <p>© 2024 Quantum Computing Lab | Data-T & Zi-us Collaboration</p>
+        </footer>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        // Update API URL display
+        document.getElementById('apiBaseUrl').textContent = API_BASE;
+        
+        async function checkApiStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/api/quantum/status`);
+                const data = await response.json();
+                alert(`API Status: ${data.status}\nSimulations Run: ${data.simulations_run}\nPython: ${data.python_version.split(' ')[0]}`);
+            } catch (error) {
+                alert(`API Connection Error: ${error.message}`);
+            }
+        }
+        
+        async function runSimulation(simulationType) {
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = 'Running...';
+            button.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/quantum/simulate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        simulation_type: simulationType,
+                        num_qubits: 23,
+                        shots: 1024
+                    })
+                });
+                
+                const data = await response.json();
+                
+                alert(`Simulation ${data.simulation_id} completed!\nQubits: ${data.qubits_used}\nType: ${data.simulation_type}`);
+                
+                // Update simulation count
+                const countElem = document.getElementById('simulationCount');
+                countElem.textContent = parseInt(countElem.textContent) + 1;
+                
+                // Refresh GIF
+                if (data.gif_path) {
+                    const gifElem = document.getElementById(simulationType === 'shipping_risk' ? 'shippingGif' : 'logisticsGif');
+                    gifElem.src = `${API_BASE}${data.gif_path}?t=${new Date().getTime()}`;
+                }
+                
+            } catch (error) {
+                alert(`Simulation Error: ${error.message}`);
+            } finally {
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        }
+        
+        async function getCircuit(circuitType) {
+            try {
+                const response = await fetch(`${API_BASE}/api/quantum/circuit/sim_demo?circuit_type=${circuitType}`);
+                
+                if (response.headers.get('content-type')?.includes('application/json')) {
+                    const data = await response.json();
+                    document.getElementById(`${circuitType}Circuit`).textContent = data.circuit;
+                } else {
+                    const text = await response.text();
+                    document.getElementById(`${circuitType}Circuit`).textContent = text;
+                }
+                
+            } catch (error) {
+                document.getElementById(`${circuitType}Circuit`).textContent = 
+                    `Error loading circuit: ${error.message}\n\nSample Circuit:\n` +
+                    `q_0: ───H───RX(π/4)───RY(π/3)───\n` +
+                    `q_1: ───H───RX(π/4)───RY(π/3)───\n` +
+                    `... (21 more qubits with gates)`;
+            }
+        }
+        
+        function downloadResults(simulationType) {
+            const content = `Quantum Simulation Results - ${simulationType}\n` +
+                           `Date: ${new Date().toISOString()}\n` +
+                           `Qubits: 23\n` +
+                           `Simulation Type: ${simulationType}\n` +
+                           `Results available at: ${API_BASE}/api/quantum/results\n\n` +
+                           document.getElementById(`${simulationType}Params`).textContent;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `quantum_${simulationType}_results_${new Date().getTime()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        async function getAllResults() {
+            try {
+                const response = await fetch(`${API_BASE}/api/quantum/results`);
+                const data = await response.json();
+                alert(`Total Simulations: ${data.length}\nLatest: ${data[data.length-1]?.id || 'None'}`);
+            } catch (error) {
+                alert(`No simulation results found. Run a simulation first.`);
+            }
+        }
+        
+        function openApiDocs() {
+            window.open(`${API_BASE}/docs`, '_blank');
+        }
+        
+        // Initialize API status check
+        window.addEventListener('load', async () => {
+            try {
+                await fetch(`${API_BASE}/`);
+                document.getElementById('apiStatus').className = 'status-indicator status-active';
+                document.getElementById('apiStatus').textContent = '●';
+            } catch (error) {
+                document.getElementById('apiStatus').textContent = '✗';
+                document.getElementById('apiStatus').style.color = '#ef4444';
+            }
+        });
+    </script>
+</body>
+</html>
